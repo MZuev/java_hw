@@ -4,6 +4,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 public class MyTreeTest {
 	
 	@Test
@@ -25,6 +29,13 @@ public class MyTreeTest {
 	public void testAdd() {
 		MyTree tree = new MyTree();
 		int n = 10;
+		tree.add("aaa");
+		tree.add("aa");
+		assertEquals(tree.getCntNode(), 4);
+		tree.remove("aaa");
+		assertEquals(tree.getCntNode(), 3);
+		tree.remove("aa");
+		assertEquals(tree.getCntNode(), 1);
 		String[] ar = {"asd", "qwe", "zxc", "qaz", "wsx", "edc", "ewq", "dsa", "cxz", "qsc"};
 		for (int i = 0; i < n; i++) {
 			assertTrue(tree.add(ar[i]));
@@ -125,5 +136,28 @@ public class MyTreeTest {
 		assertEquals(tree.howManyStartsWithPrefix(""), 3);
 		assertTrue(tree.remove(""));
 		assertEquals(tree.howManyStartsWithPrefix(""), 2);
+	}
+	
+	@Test
+	public void testSerial() throws IOException {
+		MyTree tree = new MyTree();
+		tree.add("aaa");
+		tree.add("aab");
+		tree.add("aac");
+		tree.add("aa");
+		tree.add("abb");
+		int a = tree.getCntNode();
+		assertEquals(a, 8);
+		ByteArrayOutputStream out = new ByteArrayOutputStream(100);
+		tree.serialize(out);
+		byte[] buf = out.toByteArray();
+		ByteArrayInputStream in = new ByteArrayInputStream(buf);
+		tree.deserialize(in);
+		assertEquals(a, tree.getCntNode());
+		assertTrue(tree.contains("aaa"));
+		assertTrue(tree.contains("aab"));
+		assertTrue(tree.contains("aac"));
+		assertTrue(tree.contains("aa"));
+		assertTrue(tree.contains("abb"));
 	}
 }
