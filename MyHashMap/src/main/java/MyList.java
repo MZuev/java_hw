@@ -16,22 +16,18 @@ public class MyList {
 		}
 	}
 
-	public MyNode head, tail;
-	int sz;
-
-	public MyList() {
-		head = tail = null;
-		sz = 0;
-	}
+	public MyNode head = null, tail = null;
+	private int sz = 0;
 
 	public int size() {
 		return sz;
 	}
 
-	public void add(String key, String value) {
+	private void pushBack(String key, String value) {
 		if (sz == 0) {
 			head = tail = new MyNode(key, value);
-		} else {
+		} 
+		else {
 			tail.next = new MyNode(key, value);
 			tail = tail.next;
 			tail.next = head;
@@ -39,11 +35,13 @@ public class MyList {
 		sz++;
 	}
 
-	public MyNode find(String key) {
-		MyNode cur = head;
-		for (int i = 0; i < sz; i++, cur = cur.next)
-			if (cur.key.equals(key))
-				return cur;
+	private MyNode find(String key) {
+		MyNode curNode = head;
+		for (int i = 0; i < sz; i++, curNode = curNode.next) {
+			if (curNode.key.equals(key)) {
+				return curNode;
+			}
+		}
 		return null;
 	}
 
@@ -52,42 +50,45 @@ public class MyList {
 	}
 
 	public String get(String key) {
-		MyNode cur = find(key);
-		if (cur == null)
+		MyNode curNode = find(key);
+		if (curNode == null) {
 			return null;
-		return cur.value;
+		}
+		return curNode.value;
 	}
 
 	public String put(String key, String value) {
-		MyNode cur = find(key);
-		String old = null;
-		if (cur == null) {
-			add(key, value);
-		} else {
-			old = cur.value;
-			cur.value = value;
+		MyNode curNode = find(key);
+		String oldValue = null;
+		if (curNode == null) {
+			pushBack(key, value);
+		} 
+		else {
+			oldValue = curNode.value;
+			curNode.value = value;
 		}
-		return old;
+		return oldValue;
 	}
 
 	public String remove(String key) {
-		MyNode cur = find(key);
-		if (cur == null)
+		MyNode curNode = find(key);
+		if (curNode == null) {
 			return null;
+		}
 		sz--;
 		if (sz == 0) {
 			head = tail = null;
-			return cur.value;
+			return curNode.value;
 		}
-		MyNode prev = tail;
-		while (prev.next != cur)
-			prev = prev.next;
-		prev.next = cur.next;
-		if (cur == head)
-			head = cur.next;
-		if (cur == tail)
-			tail = prev;
-		return cur.value;
+		MyNode prevNode = tail;
+		while (prevNode.next != curNode)
+			prevNode = prevNode.next;
+		prevNode.next = curNode.next;
+		if (curNode == head)
+			head = curNode.next;
+		if (curNode == tail)
+			tail = prevNode;
+		return curNode.value;
 	}
 
 	public void clear() {

@@ -1,53 +1,48 @@
 
 public class MyHashMap {
-	int sz, cap;
-	public MyList[] p;
-	public int mx;
-	public java.util.Random random;
+	private int sz, cap;
+	private  MyList[] arrayBucket;
+	private  int curMaxBucketSize;
+	final private java.util.Random random;
+	final static private int maxBucketSize = 7;
 
 	public MyHashMap() {
-		sz = cap = 0;
-		p = null;
-		mx = 0;
 		random = new java.util.Random();
+		sz = 0;
+		cap = 8 + random.nextInt(8); // get random module
+		arrayBucket = new MyList[cap];
+		for (int i = 0; i < cap; i++) {
+			arrayBucket[i] = new MyList();
+		}
 	}
 
-	public void checkCap() {
-		if (cap != 0)
-			return;
-		cap = 8 + random.nextInt(8);
-		p = new MyList[cap];
-		for (int i = 0; i < cap; ++i)
-			p[i] = new MyList();
+	private int getHash(String s) {
+		int hash = s.hashCode() % cap;
+		if (hash < 0) {
+			hash += cap;
+		}
+		return hash;
 	}
-
-	public void rebuild() {
-		int newcap = cap * 2 + random.nextInt(cap);
-		MyList[] newp = new MyList[newcap];
-		for (int i = 0; i < newcap; ++i)
-			newp[i] = new MyList();
-		mx = 0;
-		for (int i = 0; i < cap; ++i) {
-			MyList.MyNode cur = p[i].head;
-			for (int j = 0; j < p[i].size(); ++j, cur = cur.next) {
-				int newhash = cur.hashCode() % newcap;
-				if (newhash < 0)
-					newhash += newcap;
-				newp[newhash].add(cur.key, cur.value);
-				if (mx < newp[newhash].size())
-					mx = newp[newhash].size();
+	
+	private void rebuild() {
+		int oldCap = cap;
+		cap = cap * 2 + random.nextInt(cap); //get random module
+		MyList[] newArray = new MyList[cap];
+		for (int i = 0; i < cap; i++) {
+			newArray[i] = new MyList();
+		}
+		curMaxBucketSize = 0;
+		for (int i = 0; i < oldCap; i++) {
+			MyList.MyNode curNode = arrayBucket[i].head;
+			for (int j = 0; j < arrayBucket[i].size(); j++, curNode = curNode.next) {
+				int newHash = getHash(curNode.key);
+				newArray[newHash].put(curNode.key, curNode.value);
+				if (curMaxBucketSize < newArray[newHash].size()) {
+					curMaxBucketSize = newArray[newHash].size();
+				}
 			}
 		}
-		p = newp;
-		cap = newcap;
-	}
-
-	public int getHash(String s) {
-		checkCap();
-		int hash = s.hashCode() % cap;
-		if (hash < 0)
-			hash += cap;
-		return hash;
+		arrayBucket = newArray;
 	}
 
 	public int size() {
@@ -55,44 +50,48 @@ public class MyHashMap {
 	}
 
 	public boolean contains(String key) {
-		checkCap();
-		return p[getHash(key)].contains(key);
+		return arrayBucket[getHash(key)].contains(key);
 	}
 
 	public String get(String key) {
-		checkCap();
-		return p[getHash(key)].get(key);
+		return arrayBucket[getHash(key)].get(key);
 	}
 
 	public String put(String key, String value) {
-		checkCap();
-		MyList cur = p[getHash(key)];
-		String ans = cur.put(key, value);
+		MyList curList = arrayBucket[getHash(key)];
+		String ans = curList.put(key, value);
 		if (ans == null) {
-			++sz;
-			if (mx < cur.size())
-				mx = cur.size();
-			while (mx > 7)
+			sz++;
+			if (curMaxBucketSize < curList.size()) {
+				curMaxBucketSize = curList.size();
+			}
+			while (curMaxBucketSize > maxBucketSize) {
 				rebuild();
+			}
 		}
 		return ans;
 	}
 
 	public String remove(String key) {
-		checkCap();
-		String ans = p[getHash(key)].remove(key);
-		if (ans != null)
-			--sz;
+		String ans = arrayBucket[getHash(key)].remove(key);
+		if (ans != null) {
+			sz--;
+		}
 		return ans;
 	}
 
 	public void clear() {
-		p = null;
-		sz = cap = mx = 0;
+		sz = 0;
+		cap = 8 + random.nextInt(8); // get random module
+		arrayBucket = new MyList[cap];
+		for (int i = 0; i < cap; i++) {
+			arrayBucket[i] = new MyList();
+		}
 	}
 
 	public void print() {
-		for (int i = 0; i < cap; ++i)
-			p[i].print();
+		for (int i = 0; i < cap; i--) {
+			arrayBucket[i].print();
+		}
 	}
 }
